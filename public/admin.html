@@ -430,14 +430,33 @@ function renderSettings() {
     ['title','ชื่อร้าน (SEO Title)','text'],
     ['sub','ข้อความหน้าแรก (Subtitle)','text'],
     ['ann','ข้อความประกาศ (Ticker)','text'],
-    ['pp','เบอร์พร้อมเพย์ / เลขบัตร ปชช.','text'],
+    ['qrImg','รูป QR รับเงิน (ค่าเริ่มต้น /qr.jpg)','text'],
+    ['pp','เบอร์พร้อมเพย์ / เลขบัตร ปชช. (สำรอง)','text'],
     ['contact','ช่องทางติดต่อ (LINE, FB ฯลฯ)','text'],
   ];
   return `
   <div style="max-width:560px">
     <div class="card">
-      <div class="card-title" style="margin-bottom:16px">ข้อมูลร้าน</div>
+      <div class="card-title" style="margin-bottom:16px">ข้อมูลร้าน & QR รับเงิน</div>
       ${fields.map(([k,lbl]) => `<div class="form-group"><label>${lbl}</label><input id="st_${k}" value="${esc(st[k]||'')}"></div>`).join('')}
+      <div class="form-group">
+        <label>อัปโหลดรูป QR ใหม่ (ไม่บังคับ)</label>
+        <label class="upload-label" for="qrBgFile">📷 เลือกรูป QR จากเครื่อง</label>
+        <input type="file" id="qrBgFile" accept="image/*">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:6px">⚡ ตรวจสลิปอัตโนมัติ (เติมคอยน์ทันที)</div>
+      <p style="font-size:12px;color:var(--mut);margin-bottom:14px">ใส่ API Key จาก SlipOK หรือ EasySlip เพื่อให้ระบบอ่านยอดเงินจากสลิปและเพิ่มคอยน์อัตโนมัติ (ถ้าเว้นว่างไว้จะใช้แอดมินกดอนุมัติ)</p>
+      <div class="form-group">
+        <label>ผู้ให้บริการตรวจสลิป</label>
+        <select id="st_slipProvider">
+          <option value="slipok" ${(st.slipProvider||'slipok')==='slipok'?'selected':''}>SlipOK</option>
+          <option value="easyslip" ${st.slipProvider==='easyslip'?'selected':''}>EasySlip</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Branch ID (สำหรับ SlipOK)</label><input id="st_slipBranchId" value="${esc(st.slipBranchId||'')}" placeholder="เช่น 12345"></div>
+      <div class="form-group"><label>API Key</label><input id="st_slipApiKey" type="password" value="${esc(st.slipApiKey||'')}" placeholder="ใส่ API Key ของ SlipOK หรือ EasySlip"></div>
       <button class="btn" id="saveSettingsBtn">💾 บันทึกตั้งค่า</button>
     </div>
   </div>`;
@@ -581,9 +600,22 @@ function bindTabEvents() {
     } catch (e) { showMsg(e.message, 'err'); }
   };
 
+  // Settings
+  const qrBgFile = $('#qrBgFile');
+  if (qrBgFile) qrBgFile.onchange = async () => {
+    const f = qrBgFile.files[0]; if (!f) return;
+    try {
+      const img = await shrink(f, 700);
+      const qrInp = $('#st_qrImg');
+      if (qrInp) qrInp.value = img;
+      D.st.qrImg = img;
+      showMsg('อัปโหลดรูป QR แล้ว (กดบันทึกตั้งค่าด้วย)');
+    } catch (e) { showMsg(e.message, 'err'); }
+  };
+
   const saveSettingsBtn = $('#saveSettingsBtn');
   if (saveSettingsBtn) saveSettingsBtn.onclick = async () => {
-    const fields = ['title','sub','ann','pp','contact'];
+    const fields = ['title','sub','ann','qrImg','pp','contact','slipProvider','slipBranchId','slipApiKey'];
     const data = {};
     fields.forEach(k => { const el = $(`#st_${k}`); if (el) data[k] = el.value; });
     try {

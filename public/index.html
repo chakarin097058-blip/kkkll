@@ -7,25 +7,37 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link id="fontLink" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style id="themeVars">
 :root{--p:#d8f01c;--bg:#050505;--card:#0d0d0b;--line:#23231c;--mut:#8f8f84}
 </style>
 <style>
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;color:#f4f4f0;font:300 16px/1.6 var(--font,Kanit),system-ui,sans-serif;background:var(--hero-img,none) center/cover no-repeat fixed,radial-gradient(900px 500px at 50% -10%,color-mix(in srgb,var(--p) 12%,transparent),transparent 70%),linear-gradient(#ffffff07 1px,transparent 1px) 0 0/56px 56px,linear-gradient(90deg,#ffffff07 1px,transparent 1px) 0 0/56px 56px,var(--bg)}
-button,input{font:inherit;color:inherit}
+button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;border-radius:12px;padding:10px 20px;background:var(--p);color:#000;font-weight:600;transition:.15s}
 button:hover{filter:brightness(1.1);transform:translateY(-1px)}
 button.g{background:#ffffff0a;color:#fff;border:1px solid var(--line)}
 button.g.on{border-color:var(--p);color:var(--p)}
-button:disabled{opacity:.4}
-input{background:#000;border:1px solid var(--line);border-radius:12px;padding:10px 14px;width:100%}
-input:focus{outline:1px solid var(--p)}
+button:disabled{opacity:.4;cursor:not-allowed}
+input,select{background:#000;border:1px solid var(--line);border-radius:12px;padding:10px 14px;width:100%}
+input:focus,select:focus{outline:1px solid var(--p)}
 .w{max-width:1120px;margin:auto;padding:0 20px}
-header{position:sticky;top:0;z-index:5;background:#050505d9;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:15;background:#050505d9;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .nv{display:flex;align-items:center;gap:10px;min-height:68px;flex-wrap:wrap}
 .lg{font-weight:800;font-size:22px;letter-spacing:3px;margin-right:auto;cursor:pointer}
-.lg b{color:var(--p)}.nv input{width:220px}
+.lg b{color:var(--p)}.nv input#q{width:220px}
+/* User Dropdown */
+.umenu{position:relative}
+.ubtn{display:flex;align-items:center;gap:8px;background:#ffffff0a;color:#fff;border:1px solid var(--line);padding:6px 14px 6px 8px;border-radius:99px}
+.uav{width:28px;height:28px;border-radius:50%;background:var(--p);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;overflow:hidden;flex-shrink:0}
+.uav img{width:100%;height:100%;object-fit:cover}
+.udrop{position:absolute;right:0;top:calc(100% + 8px);width:240px;background:#111116;border:1px solid var(--line);border-radius:16px;padding:8px;box-shadow:0 16px 40px #000a;z-index:30}
+.udrop-hd{padding:10px 12px;border-bottom:1px solid var(--line);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.udrop-it{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;color:#e8e8f0;padding:10px 12px;border-radius:10px;font-weight:400;font-size:14px}
+.udrop-it:hover{background:#ffffff0d;transform:none}
+.udrop-it.red{color:#ff6b6b}
+/* Hero & Shop */
 .hero{text-align:center;padding:90px 0 50px}
 .bdg{display:inline-block;border:1px solid var(--p);color:var(--p);border-radius:99px;padding:3px 16px;font-size:13px;margin-bottom:18px}
 h1{font-size:clamp(38px,9vw,84px);line-height:1.05;margin:0 0 16px;font-weight:800;letter-spacing:1px}
@@ -50,18 +62,24 @@ small,.mut{color:var(--mut)}
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .steps div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
 .steps i{font-style:normal;display:inline-flex;width:34px;height:34px;border-radius:50%;background:var(--p);color:#000;align-items:center;justify-content:center;font-weight:800;margin-bottom:8px}
-.ov{position:fixed;inset:0;background:#000c;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}
+/* Modals */
+.ov{position:fixed;inset:0;background:#000c;z-index:25;display:flex;align-items:center;justify-content:center;padding:16px}
 .md{background:#0d0d0b;border:1px solid var(--line);border-radius:20px;padding:24px;width:min(480px,100%);max-height:92vh;overflow:auto}
 .row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:10px 0}
 .f{display:grid;gap:10px}
 #qr{background:#fff;padding:12px;border-radius:14px;width:fit-content;margin:12px auto}
+.qr-img{display:block;max-width:260px;width:100%;margin:12px auto;border-radius:14px;background:#fff;padding:6px}
+.timer{display:inline-block;background:#f59e0b22;color:#f59e0b;border-radius:8px;padding:2px 10px;font-size:13px;font-weight:600}
 .msg{color:#ff6b6b}.ok{color:var(--p)}
 .li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
 pre{white-space:pre-wrap;background:#000;border-radius:10px;padding:10px;margin:8px 0 0;user-select:all;border:1px solid var(--line)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:16px}
+.chk{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;color:#ccc;margin:12px 0}
+.chk input{width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--p)}
 .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--p);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 footer{text-align:center;color:var(--mut);padding:50px 0;margin-top:60px;border-top:1px solid var(--line)}
-@media(max-width:640px){.nv input{width:100%;order:9}.st{grid-template-columns:1fr}}
+@media(max-width:640px){.nv input#q{width:100%;order:9}.st{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -72,6 +90,7 @@ const fmt=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 const $=s=>document.querySelector(s);
 
 let T=localStorage.t||'',me=null,D={pr:[],st:{}},cat='ทั้งหมด',q='',view='home',modal=null,cur=null,qty=1,tab='login',F={amt:100},msg='',mine=null,loading=false;
+let udrop=false,myAvatar='',ordSearch='',ordFilter='all',agreeTerms=false,qrDeadline=0,qrTimerInt=null;
 
 function applyTheme(st) {
   if (!st) return;
@@ -94,7 +113,6 @@ const api=async(a,d={})=>{
 };
 
 const imgCache = {};
-
 const tlv=(i,v)=>i+String(v.length).padStart(2,'0')+v;
 function crc(s){let c=0xFFFF;for(const ch of s){c^=ch.charCodeAt(0)<<8;for(let i=0;i<8;i++)c=c&0x8000?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')}
 function ppay(id,amt){id=id.replace(/\D/g,'');const t=id.length>=13?'02':'01',v=id.length>=13?id:'0066'+id.replace(/^0/,'');const s=tlv('00','01')+tlv('01','12')+tlv('29',tlv('00','A000000677010111')+tlv(t,v))+tlv('53','764')+tlv('54',amt.toFixed(2))+tlv('58','TH')+'6304';return s+crc(s)}
@@ -107,11 +125,28 @@ function getImgEl(p) {
 
 const card=p=>`<div class="card" data-a="open" data-v="${p.id}"><div class="im">${getImgEl(p)}</div><b>${esc(p.name)}</b><small>${esc(p.cat)} • เหลือ ${p.stock>=999?'∞':p.stock}</small><span class="pr">${fmt(p.price)}</span></div>`;
 
+function avatarHtml(size=28) {
+  const initial = esc((me?.displayName||me?.n||'U')[0].toUpperCase());
+  return myAvatar ? `<span class="uav" style="width:${size}px;height:${size}px"><img src="${myAvatar}"></span>` : `<span class="uav" style="width:${size}px;height:${size}px">${initial}</span>`;
+}
+
 function nav(){
   const logoTxt = D.st.logoText || D.st.title || 'HEX PRODUCT';
   const parts = logoTxt.split(' ');
   const logoHtml = parts.length > 1 ? parts.slice(0,-1).join(' ') + ' <b>' + esc(parts[parts.length-1]) + '</b>' : `<b>${esc(logoTxt)}</b>`;
-  return `<header><div class="w nv"><div class="lg" data-a="home">${logoHtml}</div><input id="q" placeholder="ค้นหาสินค้า..." value="${esc(q)}">${me?`<button class="g" data-a="orders">ออเดอร์</button><button data-a="wallet">🪙 ${Number(me.coins||0).toLocaleString()} เติมเงิน</button><button class="g" data-a="out">${esc(me.n)} ออก</button>`:`<button class="g" data-a="reg">สมัครสมาชิก</button><button data-a="log">เข้าสู่ระบบ</button>`}</div></header>`;
+  return `<header><div class="w nv"><div class="lg" data-a="home">${logoHtml}</div><input id="q" placeholder="ค้นหาสินค้า..." value="${esc(q)}">${me?`
+    <button data-a="wallet">🪙 ${Number(me.coins||0).toLocaleString()} เติมเงิน</button>
+    <div class="umenu">
+      <button class="ubtn" data-a="toggle_udrop">${avatarHtml(28)}<span>${esc(me.displayName||me.n)}</span> ▾</button>
+      ${udrop?`<div class="udrop">
+        <div class="udrop-hd">${avatarHtml(34)}<div><div style="font-weight:600;font-size:14px">${esc(me.displayName||me.n)}</div><small>@${esc(me.n)}</small></div></div>
+        <button class="udrop-it" data-a="profile">👤 จัดการโปรไฟล์</button>
+        <button class="udrop-it" data-a="orders">📦 ออเดอร์ & ประวัติเติมเงิน</button>
+        <button class="udrop-it" data-a="home">🛒 เลือกซื้อสินค้า</button>
+        <button class="udrop-it red" data-a="out">🚪 ออกจากระบบ</button>
+      </div>`:''}
+    </div>
+  `:`<button class="g" data-a="reg">สมัครสมาชิก</button><button data-a="log">เข้าสู่ระบบ</button>`}</div></header>`;
 }
 
 function home(){
@@ -129,10 +164,59 @@ function home(){
 }
 
 function orders(){
-  if(!mine)return '<div class="w"><p class="mut"><span class="spin"></span>กำลังโหลด...</p></div>';
-  const stt={pending:'รอส่งของ',done:'ส่งแล้ว ✅',approved:'อนุมัติแล้ว',rejected:'ไม่อนุมัติ'};
-  return `<div class="w"><h2>ออเดอร์ของฉัน</h2>${mine.orders.map(o=>`<div class="li"><div class="row"><b>${esc(o.item)} × ${o.q}</b><span class="${o.s==='done'?'ok':''}">${stt[o.s]||o.s}</span></div><small>${esc(o.id)} • ${fmt(o.total)}</small>${o.d?`<pre>${esc(o.d)}</pre>`:''}</div>`).join('')||'<p class="mut">ยังไม่มีออเดอร์</p>'}
-  <h2>ประวัติเติมคอยน์</h2>${mine.topups.map(t=>`<div class="li row"><span>${fmt(t.amount)} <small>${new Date(t.ts).toLocaleString('th-TH')}</small></span><span>${(stt[t.s]||t.s)}${t.s==='pending'?' (รอตรวจสลิป)':''}</span></div>`).join('')||'<p class="mut">-</p>'}</div>`;
+  if(!mine)return '<div class="w"><p class="mut" style="padding:40px 0"><span class="spin"></span>กำลังโหลด...</p></div>';
+  const stt={pending:'รอส่งของ',done:'ส่งแล้ว ✅',approved:'อนุมัติแล้ว ✅',rejected:'ไม่อนุมัติ'};
+  const filteredOrders = mine.orders.filter(o => {
+    const matchStatus = ordFilter === 'all' || o.s === ordFilter;
+    const kw = ordSearch.trim().toLowerCase();
+    const matchKw = !kw || o.id.toLowerCase().includes(kw) || o.item.toLowerCase().includes(kw);
+    return matchStatus && matchKw;
+  });
+  return `<div class="w" style="padding-top:24px">
+    <button class="g" data-a="home" style="margin-bottom:12px">← กลับหน้าแรก</button>
+    <h2 style="margin-top:8px">การสั่งซื้อของฉัน</h2>
+    <div class="chips">
+      ${[['all','ทั้งหมด'],['pending','รอส่งของ'],['done','ส่งแล้ว']].map(([k,l])=>`<button class="g ${ordFilter===k?'on':''}" data-a="ord_filter" data-v="${k}">${l}</button>`).join('')}
+    </div>
+    <input id="ordSearch" placeholder="ค้นหาหมายเลขออเดอร์ หรือชื่อสินค้า..." value="${esc(ordSearch)}" style="margin-bottom:16px">
+    ${filteredOrders.map(o=>`<div class="li"><div class="row"><b>${esc(o.item)} × ${o.q}</b><span class="${o.s==='done'?'ok':''}">${stt[o.s]||o.s}</span></div><small>${esc(o.id)} • ${fmt(o.total)} • ${new Date(o.ts).toLocaleString('th-TH')}</small>${o.d?`<pre>${esc(o.d)}</pre>`:''}</div>`).join('')||'<p class="mut">ไม่พบรายการสั่งซื้อ</p>'}
+    <h2>ประวัติเติมคอยน์</h2>
+    ${mine.topups.map(t=>`<div class="li row"><span>${fmt(t.amount)} ${t.auto?'<small class="ok">(อัตโนมัติ)</small>':''} <small>${new Date(t.ts).toLocaleString('th-TH')}</small></span><span class="${t.s==='approved'?'ok':''}">${stt[t.s]||t.s}${t.s==='pending'?' (รอตรวจสลิป)':''}</span></div>`).join('')||'<p class="mut">ยังไม่มีประวัติเติมคอยน์</p>'}
+  </div>`;
+}
+
+function profilePage() {
+  if (!me) return home();
+  return `<div class="w" style="max-width:600px;padding-top:24px">
+    <button class="g" data-a="home" style="margin-bottom:16px">← กลับหน้าแรก</button>
+    <h2 style="margin:0 0 6px">โปรไฟล์ของฉัน</h2>
+    <p class="mut" style="margin-top:0">จัดการชื่อที่แสดง รูปโปรไฟล์ และรหัสผ่าน</p>
+    <div class="box">
+      <div class="row" style="justify-content:flex-start;gap:16px;margin-bottom:16px">
+        ${avatarHtml(64)}
+        <div>
+          <div style="font-weight:600;font-size:18px">${esc(me.displayName||me.n)}</div>
+          <label class="g" style="display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:13px;margin-top:6px">
+            📷 เปลี่ยนรูปโปรไฟล์
+            <input id="avFile" type="file" accept="image/*" style="display:none">
+          </label>
+        </div>
+      </div>
+      <div class="f">
+        <label><small>ชื่อที่แสดง</small><input id="pfName" value="${esc(me.displayName||me.n)}" placeholder="ชื่อที่แสดง"></label>
+        ${msg && modal!=='auth' ? `<p class="${msg.includes('สำเร็จ')||msg.includes('แล้ว')?'ok':'msg'}" style="margin:0">${esc(msg)}</p>` : ''}
+        <button data-a="save_profile" ${loading?'disabled':''}>บันทึกข้อมูล</button>
+      </div>
+    </div>
+    <div class="box">
+      <h3 style="margin-top:0">เปลี่ยนรหัสผ่าน</h3>
+      <div class="f">
+        <input id="pwCur" type="password" placeholder="รหัสผ่านปัจจุบัน">
+        <input id="pwNew" type="password" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)">
+        <button data-a="save_pw" ${loading?'disabled':''}>เปลี่ยนรหัสผ่าน</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function mod(){
@@ -140,19 +224,34 @@ function mod(){
   if(modal==='prod'){
     const p=D.pr.find(x=>x.id==cur);
     if(!p){modal=null;return ''}
-    b=`<div class="row"><b style="font-size:22px">${esc(p.name)}</b>${X}</div><div class="im" style="max-height:240px">${getImgEl(p)}</div><div class="row"><span class="pr" style="font-size:30px">${fmt(p.price)}</span><small>คงเหลือ ${p.stock>=999?'∞':p.stock}</small></div><p class="mut">ชำระด้วยคอยน์ในบัญชี • รับสินค้าที่หน้าออเดอร์ภายใน 24 ชม.</p><div class="row"><span>จำนวน</span><span><button class="g" data-a="qm">−</button> <b>${qty}</b> <button class="g" data-a="qp">+</button></span></div><div class="row"><b>รวม</b><b class="pr">${fmt(p.price*qty)}</b></div><p class="msg">${esc(msg)}</p><button style="width:100%" data-a="buy" ${p.stock<1?'disabled':''}>${p.stock<1?'สินค้าหมด':me?'ซื้อด้วยคอยน์':'เข้าสู่ระบบเพื่อซื้อ'}</button>`;
+    b=`<div class="row"><b style="font-size:22px">${esc(p.name)}</b>${X}</div><div class="im" style="max-height:240px">${getImgEl(p)}</div><div class="row"><span class="pr" style="font-size:30px">${fmt(p.price)}</span><small>คงเหลือ ${p.stock>=999?'∞':p.stock}</small></div><p class="mut">ชำระด้วยคอยน์ในบัญชี • รับสินค้าที่หน้าออเดอร์ภายใน 24 ชม.</p><div class="row"><span>จำนวน</span><span><button class="g" data-a="qm">−</button> <b>${qty}</b> <button class="g" data-a="qp">+</button></span></div><div class="row"><b>รวม</b><b class="pr">${fmt(p.price*qty)}</b></div>
+    <label class="chk"><input type="checkbox" id="chkTerms" ${agreeTerms?'checked':''}><span>ฉันยอมรับเงื่อนไขการใช้บริการ (สินค้าดิจิทัลซื้อแล้วไม่สามารถขอคืนเงินได้)</span></label>
+    <p class="msg">${esc(msg)}</p><button style="width:100%" data-a="buy" ${p.stock<1||loading?'disabled':''}>${p.stock<1?'สินค้าหมด':loading?'<span class="spin"></span>กำลังสั่งซื้อ...':me?'ยืนยันการสั่งซื้อด้วยคอยน์':'เข้าสู่ระบบเพื่อซื้อ'}</button>`;
   }else if(modal==='auth'){
     b=`<div class="row"><b style="font-size:22px">${tab==='login'?'เข้าสู่ระบบ':'สมัครสมาชิก'}</b>${X}</div><div class="f"><input data-o="n" placeholder="ชื่อผู้ใช้ (a-z 0-9 _)" value="${esc(F.n||'')}"><input data-o="p" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" value="${esc(F.p||'')}"><p class="msg">${esc(msg)}</p><button data-a="auth" ${loading?'disabled':''}>${loading?'<span class="spin"></span>กำลังดำเนินการ...':tab==='login'?'เข้าสู่ระบบ':'สมัครสมาชิก'}</button><button class="g" data-a="tab">${tab==='login'?'ยังไม่มีบัญชี? สมัครสมาชิก':'มีบัญชีแล้ว? เข้าสู่ระบบ'}</button></div>`;
   }else if(modal==='wallet'){
     const a=Number(F.amt)||0;
-    b=`<div class="row"><b style="font-size:22px">เติมคอยน์ (1 คอยน์ = 1 บาท)</b>${X}</div><div class="f"><input data-o="amt" type="number" min="1" value="${esc(F.amt)}" placeholder="จำนวนเงิน"><button class="g" data-a="qr">สร้าง QR พร้อมเพย์</button></div>${D.st.pp?(F.qr?`<div id="qr"></div><p class="mut" style="text-align:center">สแกนจ่าย ${fmt(a)} แล้วแนบสลิปด้านล่าง</p>`:''):'<p class="msg">ร้านยังไม่ได้ตั้งค่าเบอร์พร้อมเพย์</p>'}<div class="f"><input id="sl" type="file" accept="image/*"><p class="${msg==='ส่งสลิปแล้ว รอแอดมินตรวจสอบ'?'ok':'msg'}">${esc(msg)}</p><button data-a="slip" ${loading?'disabled':''}>${loading?'<span class="spin"></span>กำลังส่ง...':'ส่งสลิปให้แอดมินตรวจสอบ'}</button></div>`;
+    const rem=Math.max(0,Math.floor((qrDeadline-Date.now())/1000));
+    const mm=String(Math.floor(rem/60)).padStart(2,'0'), ss=String(rem%60).padStart(2,'0');
+    const qrSrc = D.st.qrImg || '/qr.jpg';
+    const isAuto = !!D.st.autoSlip;
+    b=`<div class="row"><b style="font-size:22px">QR PromptPay เติมคอยน์</b>${X}</div>
+    <div class="row" style="margin:4px 0"><small class="mut">1 บาท = 1 คอยน์ ${isAuto?'• ⚡ ตรวจสลิปอัตโนมัติ':''}</small><span class="timer" id="qrTimer">⏳ ${mm}:${ss}</span></div>
+    ${qrSrc?`<img class="qr-img" src="${esc(qrSrc)}" alt="QR PromptPay">`:(D.st.pp?`<div id="qr"></div>`:'<p class="msg">ร้านยังไม่ได้ตั้งค่า QR รับเงิน</p>')}
+    <p class="mut" style="text-align:center;font-size:13px;margin:6px 0 12px">สแกน QR ด้านบนเพื่อโอนเงิน แล้วแนบสลิปด้านล่าง</p>
+    <div class="f">
+      ${isAuto?'':`<input data-o="amt" type="number" min="1" value="${esc(F.amt)}" placeholder="จำนวนเงินที่โอน (บาท)">`}
+      <input id="sl" type="file" accept="image/*">
+      <p class="${msg.includes('สำเร็จ')||msg.includes('ส่งสลิป')?'ok':'msg'}" style="margin:0">${esc(msg)}</p>
+      <button data-a="slip" ${loading?'disabled':''}>${loading?'<span class="spin"></span>กำลังตรวจสอบสลิป...':isAuto?'⚡ ตรวจสอบสลิป & เติมคอยน์อัตโนมัติ':'ส่งสลิปให้แอดมินตรวจสอบ'}</button>
+    </div>`;
   }
   return `<div class="ov"><div class="md">${b}</div></div>`;
 }
 
 function render(){
-  $('#app').innerHTML=nav()+(view==='orders'?orders():home())+(modal?mod():'');
-  if(modal==='wallet'&&F.qr&&D.st.pp&&window.QRCode){
+  $('#app').innerHTML=nav()+(view==='orders'?orders():view==='profile'?profilePage():home())+(modal?mod():'');
+  if(modal==='wallet'&&!D.st.qrImg&&D.st.pp&&window.QRCode){
     const el=$('#qr');
     if(el&&!el.dataset.done){el.dataset.done='1';new QRCode(el,{text:ppay(D.st.pp,Number(F.amt)||0),width:220,height:220,colorDark:'#000',colorLight:'#fff'})}
   }
@@ -165,23 +264,60 @@ function render(){
 
 const shrink=f=>new Promise((ok,no)=>{const r=new FileReader;r.onload=()=>{const i=new Image;i.onload=()=>{const k=Math.min(1,900/i.width),cv=document.createElement('canvas');cv.width=Math.round(i.width*k);cv.height=Math.round(i.height*k);cv.getContext('2d').drawImage(i,0,0,cv.width,cv.height);ok(cv.toDataURL('image/jpeg',.75))};i.onerror=no;i.src=r.result};r.onerror=no;r.readAsDataURL(f)});
 
+// Decode QR from slip image using jsQR
+const decodeSlipQR = dataUrl => new Promise(res => {
+  if (!window.jsQR) return res('');
+  const img = new Image();
+  img.onload = () => {
+    const cv = document.createElement('canvas');
+    cv.width = img.width; cv.height = img.height;
+    const ctx = cv.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imgData = ctx.getImageData(0, 0, cv.width, cv.height);
+    const code = jsQR(imgData.data, cv.width, cv.height);
+    res(code ? code.data : '');
+  };
+  img.onerror = () => res('');
+  img.src = dataUrl;
+});
+
+document.addEventListener('change', async e => {
+  if (e.target.id === 'chkTerms') { agreeTerms = e.target.checked; }
+  if (e.target.id === 'avFile') {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      loading = true; render();
+      const av = await shrink(f);
+      const r = await api('profile_save', { avatar: av });
+      loading = false;
+      myAvatar = av;
+      me = r.me;
+      msg = 'อัปเดตรูปโปรไฟล์สำเร็จ ✅';
+      render();
+    } catch (err) { loading = false; msg = err.message; render(); }
+  }
+});
+
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='q'){q=t.value;view='home';render();const n=$('#q');if(n){n.focus();n.setSelectionRange(q.length,q.length)}}
-  else if(t.dataset.o){F[t.dataset.o]=t.value;if(t.dataset.o==='amt')F.qr=false}
+  else if(t.id==='ordSearch'){ordSearch=t.value;render();const n=$('#ordSearch');if(n){n.focus();n.setSelectionRange(ordSearch.length,ordSearch.length)}}
+  else if(t.dataset.o){F[t.dataset.o]=t.value}
 });
 
 document.addEventListener('click',async e=>{
-  if(e.target.classList.contains('ov')){modal=null;render();return}
+  if (!e.target.closest('.umenu') && udrop) { udrop = false; render(); }
+  if(e.target.classList.contains('ov')){modal=null;clearInterval(qrTimerInt);render();return}
   const b=e.target.closest('[data-a]');if(!b)return;
   const a=b.dataset.a,v=b.dataset.v;
   msg='';
   try{
-    if(a==='home'){view='home';modal=null;scrollTo(0,0)}
+    if(a==='toggle_udrop'){udrop=!udrop}
+    else if(a==='home'){view='home';modal=null;udrop=false;scrollTo(0,0)}
     else if(a==='goshop'){view='home';render();const s=$('#shop');if(s)s.scrollIntoView();return}
     else if(a==='cat')cat=v;
-    else if(a==='open'){cur=v;qty=1;modal='prod'}
-    else if(a==='close')modal=null;
+    else if(a==='open'){cur=v;qty=1;agreeTerms=false;modal='prod'}
+    else if(a==='close'){modal=null;clearInterval(qrTimerInt)}
     else if(a==='qp'){const p=D.pr.find(x=>x.id==cur);if(p&&qty<Math.min(p.stock>=999?99:p.stock,99))qty++}
     else if(a==='qm'){if(qty>1)qty--}
     else if(a==='log'||a==='reg'){tab=a==='log'?'login':'reg';modal='auth'}
@@ -192,12 +328,27 @@ document.addEventListener('click',async e=>{
       loading=false;
       if(!r||!r.t||!r.me)throw new Error('เกิดข้อผิดพลาด กรุณาลองใหม่');
       T=r.t;localStorage.t=T;
-      me={n:r.me.n,coins:Number(r.me.coins)||0};
+      me=r.me;
+      if(me.hasAvatar){try{myAvatar=(await api('avatar',{n:me.n})).img}catch{}}
       modal=null;F={amt:100};
     }
-    else if(a==='out'){T='';localStorage.t='';me=null;view='home';mine=null}
+    else if(a==='out'){T='';localStorage.t='';me=null;myAvatar='';udrop=false;view='home';mine=null}
+    else if(a==='profile'){udrop=false;view='profile';modal=null}
+    else if(a==='save_profile'){
+      const dn=$('#pfName')?.value.trim();
+      loading=true;render();
+      const r=await api('profile_save',{displayName:dn});
+      loading=false;me=r.me;msg='บันทึกข้อมูลโปรไฟล์สำเร็จ ✅';
+    }
+    else if(a==='save_pw'){
+      const c=$('#pwCur')?.value, n=$('#pwNew')?.value;
+      loading=true;render();
+      await api('profile_pw',{currentPassword:c,newPassword:n});
+      loading=false;msg='เปลี่ยนรหัสผ่านสำเร็จ ✅';
+    }
     else if(a==='buy'){
       if(!me){tab='login';modal='auth'}
+      else if(!agreeTerms){msg='กรุณากดยอมรับเงื่อนไขการใช้บริการก่อนสั่งซื้อ'}
       else{
         loading=true;render();
         const r=await api('buy',{id:cur,q:qty});
@@ -208,21 +359,43 @@ document.addEventListener('click',async e=>{
         alert('สั่งซื้อสำเร็จ! ✅\nดูสินค้าที่หน้า "ออเดอร์"');
       }
     }
-    else if(a==='wallet'){modal='wallet';F.qr=false}
-    else if(a==='qr'){if(Number(F.amt)>=1)F.qr=true}
+    else if(a==='wallet'){
+      udrop=false;modal='wallet';
+      qrDeadline=Date.now()+600000;
+      clearInterval(qrTimerInt);
+      qrTimerInt=setInterval(()=>{
+        const el=$('#qrTimer');
+        if(!el){clearInterval(qrTimerInt);return}
+        const rem=Math.max(0,Math.floor((qrDeadline-Date.now())/1000));
+        el.textContent='⏳ '+String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0');
+      },1000);
+    }
     else if(a==='slip'){
       const f=$('#sl')&&$('#sl').files[0];
       if(!f){msg='กรุณาเลือกรูปสลิป'}
-      else{loading=true;render();await api('topup',{amount:Number(F.amt),slip:await shrink(f)});loading=false;msg='ส่งสลิปแล้ว รอแอดมินตรวจสอบ'}
+      else{
+        loading=true;render();
+        const slipImg = await shrink(f);
+        const qrData = await decodeSlipQR(slipImg);
+        const r = await api('topup',{amount:Number(F.amt),slip:slipImg,qrData});
+        loading=false;
+        if(r.auto){
+          me.coins=Number(r.coins)||me.coins;
+          msg=`เติมคอยน์อัตโนมัติสำเร็จ +${r.amount} คอยน์ ✅`;
+        }else{
+          msg='ส่งสลิปแล้ว รอแอดมินตรวจสอบ';
+        }
+      }
     }
     else if(a==='orders'){
-      view='orders';mine=null;render();
+      udrop=false;view='orders';mine=null;render();
       mine=await api('mine');
     }
+    else if(a==='ord_filter'){ordFilter=v}
   }catch(err){
     loading=false;
     msg=err.message;
-    if(/เข้าสู่ระบบ/.test(msg)&&a!=='auth'){T='';localStorage.t='';me=null}
+    if(/เข้าสู่ระบบ/.test(msg)&&a!=='auth'){T='';localStorage.t='';me=null;myAvatar=''}
   }
   render();
 });
@@ -233,13 +406,16 @@ document.addEventListener('click',async e=>{
     D=data;
     applyTheme(D.st);
   }catch(e){
-    D={pr:[],st:{title:'HEX PRODUCT',sub:e.message,ann:'',contact:'',pp:''}};
+    D={pr:[],st:{title:'HEX PRODUCT',sub:e.message,ann:'',contact:'',pp:'',qrImg:'/qr.jpg'}};
   }
   render();
   if(T){
     try{
       const r=await api('me');
-      if(r&&r.me){me={n:r.me.n,coins:Number(r.me.coins)||0}}
+      if(r&&r.me){
+        me=r.me;
+        if(me.hasAvatar){try{myAvatar=(await api('avatar',{n:me.n})).img}catch{}}
+      }
       else{T='';localStorage.t=''}
     }catch(_){T='';localStorage.t='';me=null}
     render();
