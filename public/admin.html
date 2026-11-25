@@ -107,9 +107,6 @@ input[type=file]{display:none}
 <body>
 <div id="root"></div>
 <script>
-// ════════════════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════════════════
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => '฿'+Number(n||0).toLocaleString('th-TH');
 const $ = s => document.querySelector(s);
@@ -117,15 +114,12 @@ const $$ = s => [...document.querySelectorAll(s)];
 const dateStr = ts => new Date(ts).toLocaleString('th-TH');
 
 let K = sessionStorage.getItem('akey') || '';
-let D = null; // full data from server
+let D = null;
 let tab = 'dashboard';
 let msg = { text: '', type: '' };
 let slips = {};
 let loading = false;
 
-// ════════════════════════════════════════════════════════
-// API
-// ════════════════════════════════════════════════════════
 const api = async (a, d = {}) => {
   const r = await fetch('/api/api', {
     method: 'POST',
@@ -145,7 +139,6 @@ const showMsg = (text, type = 'ok') => {
   setTimeout(() => { msg = { text: '', type: '' }; render(); }, 4000);
 };
 
-// Image shrink helper
 const shrink = (f, maxW = 800) => new Promise((ok, no) => {
   const r = new FileReader;
   r.onload = () => {
@@ -162,9 +155,6 @@ const shrink = (f, maxW = 800) => new Promise((ok, no) => {
   r.onerror = no; r.readAsDataURL(f);
 });
 
-// ════════════════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════════════════
 function render() {
   if (!K || !D) { renderLogin(); return; }
   renderMain();
@@ -193,7 +183,6 @@ function renderLogin() {
 }
 
 function renderMain() {
-  const st = D.st || {};
   const navItems = [
     ['dashboard', '📊', 'ภาพรวม'],
     ['orders', '📦', 'ออเดอร์'],
@@ -231,7 +220,6 @@ function renderMain() {
     </div>
   </div>`;
 
-  // Bind sidebar
   $$('[data-tab]').forEach(el => {
     el.onclick = () => { tab = el.dataset.tab; render(); };
   });
@@ -243,9 +231,6 @@ function renderMain() {
   bindTabEvents();
 }
 
-// ════════════════════════════════════════════════════════
-// TABS
-// ════════════════════════════════════════════════════════
 function renderTab() {
   if (tab === 'dashboard') return renderDashboard();
   if (tab === 'orders') return renderOrders();
@@ -257,7 +242,6 @@ function renderTab() {
   return '';
 }
 
-// ── Dashboard ───────────────────────────────────────────
 function renderDashboard() {
   const orders = D.orders || [], topups = D.topups || [], users = D.users || [], pr = D.pr || [];
   const revenue = orders.filter(o => o.s === 'done').reduce((s, o) => s + (o.total || 0), 0);
@@ -277,14 +261,9 @@ function renderDashboard() {
   </div>`;
 }
 
-// ── Orders ──────────────────────────────────────────────
 function renderOrders() {
   const orders = D.orders || [];
   return `
-  <div class="tabs-mini">
-    <button class="on" id="ordAll">ทั้งหมด (${orders.length})</button>
-    <button id="ordPend">รอส่ง (${orders.filter(o=>o.s==='pending').length})</button>
-  </div>
   <div id="orderList">
   ${orders.map(o => `
     <div class="card" id="o_${o.id}">
@@ -304,7 +283,6 @@ function renderOrders() {
   </div>`;
 }
 
-// ── Topups ──────────────────────────────────────────────
 function renderTopups() {
   const topups = D.topups || [];
   return `
@@ -328,7 +306,6 @@ function renderTopups() {
     </div>`).join('') || '<p style="color:var(--mut)">ยังไม่มีรายการ</p>'}`;
 }
 
-// ── Users ───────────────────────────────────────────────
 function renderUsers() {
   const users = D.users || [];
   return `
@@ -347,7 +324,6 @@ function renderUsers() {
   </div>`;
 }
 
-// ── Products ────────────────────────────────────────────
 function renderProducts() {
   const pr = D.pr || [];
   return `
@@ -382,7 +358,6 @@ function renderProducts() {
   </div>`;
 }
 
-// ── Theme ────────────────────────────────────────────────
 function renderTheme() {
   const st = { ...D.st };
   const colors = [
@@ -449,7 +424,6 @@ function renderTheme() {
   <button class="btn" id="saveThemeBtn" style="margin-top:4px">💾 บันทึกธีม</button>`;
 }
 
-// ── Settings ─────────────────────────────────────────────
 function renderSettings() {
   const st = D.st || {};
   const fields = [
@@ -469,13 +443,9 @@ function renderSettings() {
   </div>`;
 }
 
-// ════════════════════════════════════════════════════════
-// BIND EVENTS
-// ════════════════════════════════════════════════════════
 function bindTabEvents() {
   if (!D) return;
 
-  // Orders
   $$('[data-deliver]').forEach(btn => {
     btn.onclick = async () => {
       const id = btn.dataset.deliver;
@@ -485,7 +455,6 @@ function bindTabEvents() {
     };
   });
 
-  // Topups
   $$('[data-slip]').forEach(btn => {
     btn.onclick = async () => {
       const id = btn.dataset.slip;
@@ -502,7 +471,6 @@ function bindTabEvents() {
     };
   });
 
-  // Users
   const addCoinsBtn = $('#addCoinsBtn');
   if (addCoinsBtn) addCoinsBtn.onclick = async () => {
     const n = $('#cu_n')?.value.trim(), amount = $('#cu_a')?.value;
@@ -514,7 +482,6 @@ function bindTabEvents() {
     } catch (e) { showMsg(e.message, 'err'); }
   };
 
-  // Products
   const newProdBtn = $('#newProdBtn');
   if (newProdBtn) newProdBtn.onclick = () => {
     D.pr.push({ id: Date.now(), name: 'สินค้าใหม่', price: 0, stock: 1, cat: 'ทั่วไป', em: '📦', img: '' });
@@ -527,7 +494,6 @@ function bindTabEvents() {
     catch (e) { showMsg(e.message, 'err'); }
   };
 
-  // Product field edits
   $$('[data-p][data-k]').forEach(inp => {
     inp.oninput = () => {
       const p = D.pr.find(x => x.id == inp.dataset.p);
@@ -537,7 +503,6 @@ function bindTabEvents() {
     };
   });
 
-  // Product delete
   $$('[data-del]').forEach(btn => {
     btn.onclick = () => {
       if (!confirm('ลบสินค้านี้?')) return;
@@ -546,21 +511,18 @@ function bindTabEvents() {
     };
   });
 
-  // Product image upload
   $$('input[type=file][data-pid]').forEach(inp => {
     inp.onchange = async () => {
       const f = inp.files[0]; if (!f) return;
       const pid = inp.dataset.pid;
       try {
         const imgData = await shrink(f, 600);
-        // Show preview immediately
         const imgEl = $(`#pimgEl_${pid}`);
         if (imgEl) { imgEl.src = imgData; }
         else {
           const pimg = inp.closest('.pcard')?.querySelector('.pimg');
           if (pimg) { pimg.innerHTML = `<img src="${imgData}" id="pimgEl_${pid}" style="width:100%;height:100%;object-fit:cover">`; }
         }
-        // Upload to server
         const r = await api('a_upload_img', { id: pid, img: imgData });
         const p = D.pr.find(x => x.id == pid);
         if (p) p.img = r.url || imgData;
@@ -569,14 +531,11 @@ function bindTabEvents() {
     };
   });
 
-  // Load redis images
   $$('[data-rid]').forEach(async img => {
     const rid = img.dataset.rid;
     try { const r = await api('img', { id: rid }); img.src = r.img || ''; } catch {}
   });
 
-  // Theme
-  // Sync color picker <-> text
   ['colorPrimary','colorBg','colorCard'].forEach(k => {
     const picker = $(`#col_${k}`), txt = $(`#coltxt_${k}`);
     if (!picker || !txt) return;
@@ -622,7 +581,6 @@ function bindTabEvents() {
     } catch (e) { showMsg(e.message, 'err'); }
   };
 
-  // Settings
   const saveSettingsBtn = $('#saveSettingsBtn');
   if (saveSettingsBtn) saveSettingsBtn.onclick = async () => {
     const fields = ['title','sub','ann','pp','contact'];
@@ -639,14 +597,10 @@ function bindTabEvents() {
 function updateThemePreview() {
   const p = $(`#coltxt_colorPrimary`)?.value || '#d8f01c';
   const bg = $(`#coltxt_colorBg`)?.value || '#050505';
-  const card = $(`#coltxt_colorCard`)?.value || '#0d0d0b';
   const bar = $('#prevBar');
   if (bar) { bar.style.background = bg; bar.style.color = p; }
 }
 
-// ════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════
 (async () => {
   if (K) { try { await load(); } catch (e) { K = ''; sessionStorage.removeItem('akey'); } }
   render();

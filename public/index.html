@@ -73,7 +73,6 @@ const $=s=>document.querySelector(s);
 
 let T=localStorage.t||'',me=null,D={pr:[],st:{}},cat='ทั้งหมด',q='',view='home',modal=null,cur=null,qty=1,tab='login',F={amt:100},msg='',mine=null,loading=false;
 
-// Apply theme from settings
 function applyTheme(st) {
   if (!st) return;
   const vars = document.getElementById('themeVars');
@@ -94,14 +93,7 @@ const api=async(a,d={})=>{
   return j;
 };
 
-// Fetch product image from Redis if needed
 const imgCache = {};
-async function resolveImg(p) {
-  if (!p.img || !p.img.startsWith('__redis:')) return p.img || '';
-  const rid = p.img.replace('__redis:img:', '');
-  if (imgCache[rid]) return imgCache[rid];
-  try { const r = await api('img', { id: rid }); imgCache[rid] = r.img; return r.img; } catch { return ''; }
-}
 
 const tlv=(i,v)=>i+String(v.length).padStart(2,'0')+v;
 function crc(s){let c=0xFFFF;for(const ch of s){c^=ch.charCodeAt(0)<<8;for(let i=0;i<8;i++)c=c&0x8000?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')}
@@ -164,7 +156,6 @@ function render(){
     const el=$('#qr');
     if(el&&!el.dataset.done){el.dataset.done='1';new QRCode(el,{text:ppay(D.st.pp,Number(F.amt)||0),width:220,height:220,colorDark:'#000',colorLight:'#fff'})}
   }
-  // Load redis images async
   document.querySelectorAll('[data-rid]').forEach(async img => {
     const rid = img.dataset.rid;
     if (imgCache[rid]) { img.src = imgCache[rid]; return; }
@@ -236,7 +227,6 @@ document.addEventListener('click',async e=>{
   render();
 });
 
-// ── Init ─────────────────────────────────────────────────────────────
 (async()=>{
   try{
     const data=await api('shop');
