@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HEX Admin Panel</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--p:#d8f01c;--bg:#07070a;--card:#0f0f14;--border:#1e1e28;--mut:#6b6b80;--red:#e44;--green:#2ecc71}
+body{background:var(--bg);color:#e8e8f0;font:300 14px/1.6 Kanit,sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit;color:inherit}
+/* ── Sidebar ── */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0b0b10;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10}
+.sidebar-logo{padding:20px 16px 14px;font-size:18px;font-weight:800;letter-spacing:2px;border-bottom:1px solid var(--border)}
+.sidebar-logo b{color:var(--p)}
+.sidebar nav{flex:1;padding:12px 0}
+.sidebar nav a{display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--mut);text-decoration:none;transition:.15s;cursor:pointer;border-left:3px solid transparent;font-size:14px}
+.sidebar nav a:hover{color:#fff;background:#ffffff08}
+.sidebar nav a.on{color:var(--p);border-left-color:var(--p);background:#d8f01c0a;font-weight:600}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border)}
+.sidebar-footer button{width:100%;background:#ffffff0a;color:var(--mut);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;transition:.15s}
+.sidebar-footer button:hover{color:#fff}
+/* ── Main ── */
+.main{margin-left:220px;flex:1;min-width:0}
+.topbar{background:#0b0b10;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+.topbar h1{font-size:16px;font-weight:600;flex:1}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.badge.pending{background:#f59e0b22;color:#f59e0b}
+.badge.done{background:#10b98122;color:#10b981}
+.badge.approved{background:#10b98122;color:#10b981}
+.badge.rejected{background:#ef444422;color:#ef4444}
+.content{padding:24px;max-width:1100px}
+/* ── Cards / Boxes ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-weight:600;font-size:15px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row-between{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+/* ── Buttons ── */
+button{cursor:pointer;border:0;border-radius:8px;padding:7px 14px;transition:.15s;font-weight:600}
+.btn{background:var(--p);color:#000}
+.btn:hover{filter:brightness(1.1)}
+.btn-ghost{background:transparent;color:#ccc;border:1px solid var(--border)}
+.btn-ghost:hover{border-color:#555;color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{padding:4px 10px;font-size:13px}
+button:disabled{opacity:.4;cursor:not-allowed}
+/* ── Inputs ── */
+input,textarea,select{background:#000;border:1px solid var(--border);border-radius:8px;padding:8px 12px;width:100%;transition:.15s}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--p)}
+textarea{resize:vertical;min-height:70px}
+label{display:block;margin-bottom:4px;color:var(--mut);font-size:13px}
+.form-group{margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+/* ── Table-like ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th,.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl th{color:var(--mut);font-weight:400;font-size:13px}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr:hover td{background:#ffffff05}
+/* ── Color picker ── */
+.color-row{display:flex;align-items:center;gap:10px}
+.color-row input[type=color]{width:44px;height:36px;padding:2px;border-radius:6px;cursor:pointer;flex-shrink:0}
+.color-row input[type=text]{flex:1}
+/* ── Product card editor ── */
+.pcard{background:#000;border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;position:relative}
+.pcard .pimg{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#111;display:flex;align-items:center;justify-content:center;font-size:48px;cursor:pointer;overflow:hidden}
+.pcard .pimg img{width:100%;height:100%;object-fit:cover}
+.pcard .pimg-upload{position:absolute;top:10px;right:10px;background:#000a;border-radius:6px;padding:4px 8px;font-size:12px}
+/* ── Tabs ── */
+.tabs-mini{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tabs-mini button{background:0;border:0;border-bottom:2px solid transparent;padding:8px 14px;color:var(--mut);font-size:14px;margin-bottom:-1px}
+.tabs-mini button.on{color:var(--p);border-bottom-color:var(--p)}
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat-num{font-size:28px;font-weight:800;color:var(--p);line-height:1}
+.stat-label{font-size:12px;color:var(--mut);margin-top:4px}
+/* ── Msg ── */
+.msg-box{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px}
+.msg-box.ok{background:#10b98120;color:#10b981;border:1px solid #10b98140}
+.msg-box.err{background:#ef444420;color:#ef4444;border:1px solid #ef444440}
+/* ── Slip image ── */
+img.slip{max-width:100%;border-radius:10px;margin-top:8px;display:block}
+/* ── Color preview ── */
+.theme-preview{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.theme-preview-bar{padding:8px 16px;font-weight:700;font-size:14px;letter-spacing:2px}
+/* ── Login page ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;width:min(360px,94vw)}
+.login-box h2{font-size:20px;margin-bottom:20px;font-weight:700}
+/* ── upload btn ── */
+.upload-label{display:inline-block;cursor:pointer;background:#ffffff0a;border:1px dashed var(--border);border-radius:8px;padding:8px 14px;text-align:center;transition:.15s;font-size:13px;color:var(--mut)}
+.upload-label:hover{border-color:var(--p);color:var(--p)}
+input[type=file]{display:none}
+/* ── Responsive ── */
+@media(max-width:700px){
+  .sidebar{width:52px}.sidebar nav a span{display:none}.sidebar-logo span{display:none}
+  .main{margin-left:52px}.grid2,.grid3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => '฿'+Number(n||0).toLocaleString('th-TH');
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const dateStr = ts => new Date(ts).toLocaleString('th-TH');
+
+let K = sessionStorage.getItem('akey') || '';
+let D = null; // full data from server
+let tab = 'dashboard';
+let msg = { text: '', type: '' };
+let slips = {};
+let loading = false;
+
+// ════════════════════════════════════════════════════════
+// API
+// ════════════════════════════════════════════════════════
+const api = async (a, d = {}) => {
+  const r = await fetch('/api/api', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-admin-key': K },
+    body: JSON.stringify({ a, ...d })
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.e || 'เกิดข้อผิดพลาด');
+  return j;
+};
+
+const load = async () => { D = await api('a_all'); };
+
+const showMsg = (text, type = 'ok') => {
+  msg = { text, type };
+  render();
+  setTimeout(() => { msg = { text: '', type: '' }; render(); }, 4000);
+};
+
+// Image shrink helper
+const shrink = (f, maxW = 800) => new Promise((ok, no) => {
+  const r = new FileReader;
+  r.onload = () => {
+    const i = new Image;
+    i.onload = () => {
+      const k = Math.min(1, maxW / i.width);
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(i.width * k); cv.height = Math.round(i.height * k);
+      cv.getContext('2d').drawImage(i, 0, 0, cv.width, cv.height);
+      ok(cv.toDataURL('image/jpeg', 0.82));
+    };
+    i.onerror = no; i.src = r.result;
+  };
+  r.onerror = no; r.readAsDataURL(f);
+});
+
+// ════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════
+function render() {
+  if (!K || !D) { renderLogin(); return; }
+  renderMain();
+}
+
+function renderLogin() {
+  $('#root').innerHTML = `
+  <div class="login-wrap">
+    <div class="login-box">
+      <div style="font-size:20px;font-weight:800;letter-spacing:2px;margin-bottom:20px">HEX <b style="color:var(--p)">ADMIN</b></div>
+      <h2>เข้าสู่ระบบแอดมิน</h2>
+      ${msg.text ? `<div class="msg-box ${msg.type}">${esc(msg.text)}</div>` : ''}
+      <div class="form-group"><label>รหัสแอดมิน (ADMIN_KEY)</label><input id="kinput" type="password" placeholder="ใส่ ADMIN_KEY"></div>
+      <button class="btn" style="width:100%" id="loginBtn">เข้าสู่ระบบ</button>
+    </div>
+  </div>`;
+  $('#kinput').addEventListener('keydown', e => { if (e.key === 'Enter') $('#loginBtn').click(); });
+  $('#loginBtn').onclick = async () => {
+    K = $('#kinput').value.trim();
+    if (!K) return;
+    loading = true;
+    try { await load(); sessionStorage.setItem('akey', K); render(); }
+    catch (e) { K = ''; showMsg(e.message, 'err'); }
+    loading = false;
+  };
+}
+
+function renderMain() {
+  const st = D.st || {};
+  const navItems = [
+    ['dashboard', '📊', 'ภาพรวม'],
+    ['orders', '📦', 'ออเดอร์'],
+    ['topups', '💰', 'ตรวจสลิป'],
+    ['users', '👤', 'สมาชิก'],
+    ['products', '🛒', 'สินค้า'],
+    ['theme', '🎨', 'ธีม & สี'],
+    ['settings', '⚙️', 'ตั้งค่าร้าน'],
+  ];
+  const pendingOrders = (D.orders || []).filter(o => o.s === 'pending').length;
+  const pendingTopups = (D.topups || []).filter(t => t.s === 'pending').length;
+
+  $('#root').innerHTML = `
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">HEX <b>ADMIN</b></div>
+      <nav>
+        ${navItems.map(([k, ic, lbl]) => `
+          <a class="${tab === k ? 'on' : ''}" data-tab="${k}">
+            <span style="font-size:18px">${ic}</span>
+            <span>${lbl}${k === 'orders' && pendingOrders ? ` <b style="background:var(--p);color:#000;border-radius:99px;padding:1px 7px;font-size:11px">${pendingOrders}</b>` : ''}${k === 'topups' && pendingTopups ? ` <b style="background:#f59e0b;color:#000;border-radius:99px;padding:1px 7px;font-size:11px">${pendingTopups}</b>` : ''}</span>
+          </a>`).join('')}
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logoutBtn">🚪 ออกจากระบบ</button>
+      </div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <h1>${navItems.find(x => x[0] === tab)?.[2] || ''}</h1>
+        ${msg.text ? `<div class="msg-box ${msg.type}" style="margin:0">${esc(msg.text)}</div>` : ''}
+        <button class="btn-ghost btn-sm" id="refreshBtn">🔄 รีเฟรช</button>
+      </div>
+      <div class="content" id="tabContent">${renderTab()}</div>
+    </div>
+  </div>`;
+
+  // Bind sidebar
+  $$('[data-tab]').forEach(el => {
+    el.onclick = () => { tab = el.dataset.tab; render(); };
+  });
+  $('#logoutBtn').onclick = () => { K = ''; sessionStorage.removeItem('akey'); D = null; render(); };
+  $('#refreshBtn').onclick = async () => {
+    try { await load(); render(); showMsg('รีเฟรชแล้ว', 'ok'); } catch (e) { showMsg(e.message, 'err'); }
+  };
+
+  bindTabEvents();
+}
+
+// ════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════
+function renderTab() {
+  if (tab === 'dashboard') return renderDashboard();
+  if (tab === 'orders') return renderOrders();
+  if (tab === 'topups') return renderTopups();
+  if (tab === 'users') return renderUsers();
+  if (tab === 'products') return renderProducts();
+  if (tab === 'theme') return renderTheme();
+  if (tab === 'settings') return renderSettings();
+  return '';
+}
+
+// ── Dashboard ───────────────────────────────────────────
+function renderDashboard() {
+  const orders = D.orders || [], topups = D.topups || [], users = D.users || [], pr = D.pr || [];
+  const revenue = orders.filter(o => o.s === 'done').reduce((s, o) => s + (o.total || 0), 0);
+  return `
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">${pr.length}</div><div class="stat-label">สินค้าทั้งหมด</div></div>
+    <div class="stat-card"><div class="stat-num">${users.length}</div><div class="stat-label">สมาชิกทั้งหมด</div></div>
+    <div class="stat-card"><div class="stat-num">${orders.filter(o=>o.s==='pending').length}</div><div class="stat-label">ออเดอร์รอส่ง</div></div>
+    <div class="stat-card"><div class="stat-num">${topups.filter(t=>t.s==='pending').length}</div><div class="stat-label">สลิปรอตรวจ</div></div>
+    <div class="stat-card"><div class="stat-num">${fmt(revenue)}</div><div class="stat-label">ยอดขายรวม</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">ออเดอร์ล่าสุด</span></div>
+    <table class="tbl"><thead><tr><th>สินค้า</th><th>ผู้ซื้อ</th><th>ราคา</th><th>สถานะ</th></tr></thead><tbody>
+    ${(orders.slice(0,8)).map(o=>`<tr><td>${esc(o.item)} ×${o.q}</td><td>${esc(o.n)}</td><td>${fmt(o.total)}</td><td><span class="badge ${o.s}">${o.s==='done'?'ส่งแล้ว':'รอส่ง'}</span></td></tr>`).join('')||'<tr><td colspan="4" style="color:var(--mut)">ยังไม่มีออเดอร์</td></tr>'}
+    </tbody></table>
+  </div>`;
+}
+
+// ── Orders ──────────────────────────────────────────────
+function renderOrders() {
+  const orders = D.orders || [];
+  return `
+  <div class="tabs-mini">
+    <button class="on" id="ordAll">ทั้งหมด (${orders.length})</button>
+    <button id="ordPend">รอส่ง (${orders.filter(o=>o.s==='pending').length})</button>
+  </div>
+  <div id="orderList">
+  ${orders.map(o => `
+    <div class="card" id="o_${o.id}">
+      <div class="row-between" style="margin-bottom:10px">
+        <div>
+          <b>${esc(o.item)}</b> ×${o.q} — <b>${fmt(o.total)}</b>
+          <div style="font-size:12px;color:var(--mut)">${esc(o.id)} • ผู้ซื้อ: ${esc(o.n)} • ${dateStr(o.ts)}</div>
+        </div>
+        <span class="badge ${o.s}">${o.s==='done'?'ส่งแล้ว':'รอส่ง'}</span>
+      </div>
+      <div class="form-group">
+        <label>รายละเอียดสินค้า / โค้ดที่ส่งให้ลูกค้า</label>
+        <textarea id="otxt_${o.id}" placeholder="ใส่โค้ด หรือรายละเอียดสินค้า">${esc(o.d)}</textarea>
+      </div>
+      <button class="btn btn-sm" data-deliver="${o.id}">${o.s==='done'?'อัปเดตข้อความ':'✅ ส่งสินค้า'}</button>
+    </div>`).join('') || '<p style="color:var(--mut)">ยังไม่มีออเดอร์</p>'}
+  </div>`;
+}
+
+// ── Topups ──────────────────────────────────────────────
+function renderTopups() {
+  const topups = D.topups || [];
+  return `
+  ${topups.map(t => `
+    <div class="card" id="tp_${t.id}">
+      <div class="row-between">
+        <div>
+          <b>${esc(t.n)}</b> ขอเติม <b style="color:var(--p)">${fmt(t.amount)}</b>
+          <div style="font-size:12px;color:var(--mut)">${t.id} • ${dateStr(t.ts)}</div>
+        </div>
+        <span class="badge ${t.s}">${{pending:'รอตรวจ',approved:'อนุมัติแล้ว',rejected:'ปฏิเสธ'}[t.s]||t.s}</span>
+      </div>
+      ${slips[t.id] ? `<img class="slip" src="${slips[t.id]}">` : ''}
+      <div class="row" style="margin-top:10px">
+        <button class="btn-ghost btn-sm" data-slip="${t.id}">🖼 ดูสลิป</button>
+        ${t.s === 'pending' ? `
+          <button class="btn btn-sm" data-topup="${t.id}" data-ok="1">✅ อนุมัติ</button>
+          <button class="btn-red btn-sm" data-topup="${t.id}" data-ok="0">❌ ปฏิเสธ</button>
+        ` : ''}
+      </div>
+    </div>`).join('') || '<p style="color:var(--mut)">ยังไม่มีรายการ</p>'}`;
+}
+
+// ── Users ───────────────────────────────────────────────
+function renderUsers() {
+  const users = D.users || [];
+  return `
+  <div class="card" style="max-width:420px">
+    <div class="card-title" style="margin-bottom:12px">เพิ่ม / ลดคอยน์สมาชิก</div>
+    <div class="form-group"><label>ชื่อผู้ใช้</label><input id="cu_n" placeholder="username"></div>
+    <div class="form-group"><label>จำนวนคอยน์ (ใส่เลขลบเพื่อหัก)</label><input id="cu_a" type="number" placeholder="เช่น 100 หรือ -50"></div>
+    <button class="btn" id="addCoinsBtn">บันทึก</button>
+    <div id="coinMsg" style="margin-top:8px"></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">สมาชิกทั้งหมด (${users.length} คน)</span></div>
+    <table class="tbl"><thead><tr><th>ชื่อผู้ใช้</th><th>คอยน์</th></tr></thead><tbody>
+    ${users.map(u => `<tr><td>${esc(u.n)}</td><td>🪙 ${Number(u.coins||0).toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="2" style="color:var(--mut)">ยังไม่มีสมาชิก</td></tr>'}
+    </tbody></table>
+  </div>`;
+}
+
+// ── Products ────────────────────────────────────────────
+function renderProducts() {
+  const pr = D.pr || [];
+  return `
+  <div class="row-between" style="margin-bottom:16px">
+    <span style="color:var(--mut)">${pr.length} รายการ</span>
+    <div class="row">
+      <button class="btn-ghost" id="newProdBtn">+ เพิ่มสินค้า</button>
+      <button class="btn" id="saveProdBtn">💾 บันทึกทั้งหมด</button>
+    </div>
+  </div>
+  <div class="grid3" id="prodGrid">
+  ${pr.map(p => `
+    <div class="pcard" data-pid="${p.id}">
+      <label class="upload-label" for="pimg_${p.id}" title="คลิกเพื่ออัปโหลดรูป">
+        <div class="pimg">
+          ${p.img && !p.img.startsWith('__redis') ? `<img src="${esc(p.img)}" id="pimgEl_${p.id}">` : (p.img && p.img.startsWith('__redis') ? `<img src="" id="pimgEl_${p.id}" data-rid="${p.img.replace('__redis:img:','')}">` : `<span>${esc(p.em||'📦')}</span>`)}
+        </div>
+        <div style="font-size:11px;margin-top:4px;text-align:center">📷 เปลี่ยนรูป</div>
+      </label>
+      <input type="file" accept="image/*" id="pimg_${p.id}" data-pid="${p.id}">
+      <div class="form-group"><label>ชื่อสินค้า</label><input data-p="${p.id}" data-k="name" value="${esc(p.name)}"></div>
+      <div class="grid2">
+        <div class="form-group"><label>ราคา (฿)</label><input type="number" data-p="${p.id}" data-k="price" value="${p.price}"></div>
+        <div class="form-group"><label>สต็อก (999=∞)</label><input type="number" data-p="${p.id}" data-k="stock" value="${p.stock}"></div>
+      </div>
+      <div class="grid2">
+        <div class="form-group"><label>หมวดหมู่</label><input data-p="${p.id}" data-k="cat" value="${esc(p.cat)}"></div>
+        <div class="form-group"><label>อีโมจิ</label><input data-p="${p.id}" data-k="em" value="${esc(p.em||'📦')}"></div>
+      </div>
+      <button class="btn-red btn-sm" data-del="${p.id}" style="margin-top:4px">🗑 ลบ</button>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── Theme ────────────────────────────────────────────────
+function renderTheme() {
+  const st = { ...D.st };
+  const colors = [
+    ['colorPrimary', 'สีหลัก (ปุ่ม / ไฮไลต์)', '#d8f01c'],
+    ['colorBg', 'สีพื้นหลัง', '#050505'],
+    ['colorCard', 'สีการ์ดสินค้า', '#0d0d0b'],
+  ];
+  const fonts = ['Kanit','Prompt','Sarabun','Mitr','Noto Sans Thai','IBM Plex Sans Thai'];
+  return `
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:14px">🎨 สีเว็บไซต์</div>
+        ${colors.map(([k, lbl, def]) => `
+          <div class="form-group">
+            <label>${lbl}</label>
+            <div class="color-row">
+              <input type="color" id="col_${k}" value="${esc(st[k]||def)}">
+              <input type="text" id="coltxt_${k}" value="${esc(st[k]||def)}" placeholder="${def}">
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:14px">🔤 ฟอนต์</div>
+        <div class="form-group">
+          <label>ฟอนต์ภาษาไทย</label>
+          <select id="fontSel">
+            ${fonts.map(f => `<option ${(st.fontFamily||'Kanit')===f?'selected':''}>${f}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:14px">🖼 รูปพื้นหลัง Hero</div>
+        <div class="form-group">
+          <label>URL รูปพื้นหลัง (ไม่บังคับ)</label>
+          <input id="heroImg" value="${esc(st.heroImg||'')}" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>หรืออัปโหลดรูป</label>
+          <label class="upload-label" for="heroBgFile">📂 เลือกรูปพื้นหลัง</label>
+          <input type="file" id="heroBgFile" accept="image/*">
+        </div>
+        ${st.heroImg ? `<img src="${esc(st.heroImg)}" style="max-width:100%;border-radius:8px;margin-top:8px">` : ''}
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">👁 ตัวอย่างธีม</div>
+        <div class="theme-preview" id="themePreview">
+          <div class="theme-preview-bar" id="prevBar" style="background:${esc(st.colorBg||'#050505')};color:${esc(st.colorPrimary||'#d8f01c')}">
+            ${esc(st.logoText||st.title||'HEX PRODUCT')}
+          </div>
+          <div style="background:${esc(st.colorBg||'#050505')};padding:14px">
+            <div style="background:${esc(st.colorCard||'#0d0d0b')};border-radius:10px;padding:12px;margin-bottom:8px;font-size:13px;border:1px solid #222">
+              🔑 ตัวอย่างสินค้า — <b style="color:${esc(st.colorPrimary||'#d8f01c')}">฿99</b>
+            </div>
+            <button style="background:${esc(st.colorPrimary||'#d8f01c')};color:#000;border:0;border-radius:8px;padding:8px 18px;font-weight:700;cursor:default">ซื้อ</button>
+          </div>
+        </div>
+        <div class="form-group"><label>ชื่อร้านบน Navbar</label><input id="logoTxt" value="${esc(st.logoText||st.title||'HEX PRODUCT')}"></div>
+      </div>
+    </div>
+  </div>
+  <button class="btn" id="saveThemeBtn" style="margin-top:4px">💾 บันทึกธีม</button>`;
+}
+
+// ── Settings ─────────────────────────────────────────────
+function renderSettings() {
+  const st = D.st || {};
+  const fields = [
+    ['title','ชื่อร้าน (SEO Title)','text'],
+    ['sub','ข้อความหน้าแรก (Subtitle)','text'],
+    ['ann','ข้อความประกาศ (Ticker)','text'],
+    ['pp','เบอร์พร้อมเพย์ / เลขบัตร ปชช.','text'],
+    ['contact','ช่องทางติดต่อ (LINE, FB ฯลฯ)','text'],
+  ];
+  return `
+  <div style="max-width:560px">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px">ข้อมูลร้าน</div>
+      ${fields.map(([k,lbl]) => `<div class="form-group"><label>${lbl}</label><input id="st_${k}" value="${esc(st[k]||'')}"></div>`).join('')}
+      <button class="btn" id="saveSettingsBtn">💾 บันทึกตั้งค่า</button>
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// BIND EVENTS
+// ════════════════════════════════════════════════════════
+function bindTabEvents() {
+  if (!D) return;
+
+  // Orders
+  $$('[data-deliver]').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.deliver;
+      const text = $(`#otxt_${id}`)?.value || '';
+      try { await api('a_deliver', { id, text }); await load(); render(); showMsg('ส่งสินค้าแล้ว ✅'); }
+      catch (e) { showMsg(e.message, 'err'); }
+    };
+  });
+
+  // Topups
+  $$('[data-slip]').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.slip;
+      try { const r = await api('a_slip', { id }); slips[id] = r.img; render(); }
+      catch (e) { showMsg(e.message, 'err'); }
+    };
+  });
+  $$('[data-topup]').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.topup, ok = btn.dataset.ok === '1';
+      if (ok && !confirm(`อนุมัติเติมเงินให้ผู้ใช้?`)) return;
+      try { await api('a_topup', { id, ok }); await load(); render(); showMsg(ok ? '✅ อนุมัติแล้ว' : '❌ ปฏิเสธแล้ว'); }
+      catch (e) { showMsg(e.message, 'err'); }
+    };
+  });
+
+  // Users
+  const addCoinsBtn = $('#addCoinsBtn');
+  if (addCoinsBtn) addCoinsBtn.onclick = async () => {
+    const n = $('#cu_n')?.value.trim(), amount = $('#cu_a')?.value;
+    if (!n || !amount) return;
+    try {
+      const r = await api('a_coins', { n, amount });
+      await load(); render();
+      showMsg(`เพิ่มคอยน์ให้ ${n} แล้ว (คงเหลือ ${r.coins || 0} 🪙)`);
+    } catch (e) { showMsg(e.message, 'err'); }
+  };
+
+  // Products
+  const newProdBtn = $('#newProdBtn');
+  if (newProdBtn) newProdBtn.onclick = () => {
+    D.pr.push({ id: Date.now(), name: 'สินค้าใหม่', price: 0, stock: 1, cat: 'ทั่วไป', em: '📦', img: '' });
+    render();
+  };
+
+  const saveProdBtn = $('#saveProdBtn');
+  if (saveProdBtn) saveProdBtn.onclick = async () => {
+    try { await api('a_save', { pr: D.pr }); showMsg('💾 บันทึกสินค้าแล้ว'); }
+    catch (e) { showMsg(e.message, 'err'); }
+  };
+
+  // Product field edits
+  $$('[data-p][data-k]').forEach(inp => {
+    inp.oninput = () => {
+      const p = D.pr.find(x => x.id == inp.dataset.p);
+      if (!p) return;
+      const k = inp.dataset.k;
+      p[k] = (k === 'price' || k === 'stock') ? (Number(inp.value) || 0) : inp.value;
+    };
+  });
+
+  // Product delete
+  $$('[data-del]').forEach(btn => {
+    btn.onclick = () => {
+      if (!confirm('ลบสินค้านี้?')) return;
+      D.pr = D.pr.filter(p => p.id != btn.dataset.del);
+      render();
+    };
+  });
+
+  // Product image upload
+  $$('input[type=file][data-pid]').forEach(inp => {
+    inp.onchange = async () => {
+      const f = inp.files[0]; if (!f) return;
+      const pid = inp.dataset.pid;
+      try {
+        const imgData = await shrink(f, 600);
+        // Show preview immediately
+        const imgEl = $(`#pimgEl_${pid}`);
+        if (imgEl) { imgEl.src = imgData; }
+        else {
+          const pimg = inp.closest('.pcard')?.querySelector('.pimg');
+          if (pimg) { pimg.innerHTML = `<img src="${imgData}" id="pimgEl_${pid}" style="width:100%;height:100%;object-fit:cover">`; }
+        }
+        // Upload to server
+        const r = await api('a_upload_img', { id: pid, img: imgData });
+        const p = D.pr.find(x => x.id == pid);
+        if (p) p.img = r.url || imgData;
+        showMsg('อัปโหลดรูปสินค้าแล้ว ✅');
+      } catch (e) { showMsg(e.message, 'err'); }
+    };
+  });
+
+  // Load redis images
+  $$('[data-rid]').forEach(async img => {
+    const rid = img.dataset.rid;
+    try { const r = await api('img', { id: rid }); img.src = r.img || ''; } catch {}
+  });
+
+  // Theme
+  // Sync color picker <-> text
+  ['colorPrimary','colorBg','colorCard'].forEach(k => {
+    const picker = $(`#col_${k}`), txt = $(`#coltxt_${k}`);
+    if (!picker || !txt) return;
+    picker.oninput = () => { txt.value = picker.value; updateThemePreview(); };
+    txt.oninput = () => { if (/^#[0-9a-f]{6}$/i.test(txt.value)) { picker.value = txt.value; updateThemePreview(); } };
+  });
+
+  const heroImgInput = $('#heroImg');
+  if (heroImgInput) heroImgInput.oninput = () => { D.st.heroImg = heroImgInput.value; };
+
+  const heroBgFile = $('#heroBgFile');
+  if (heroBgFile) heroBgFile.onchange = async () => {
+    const f = heroBgFile.files[0]; if (!f) return;
+    try {
+      const img = await shrink(f, 1200);
+      if (heroImgInput) heroImgInput.value = img;
+      D.st.heroImg = img;
+      showMsg('อัปโหลดรูปพื้นหลังแล้ว');
+      render();
+    } catch (e) { showMsg(e.message, 'err'); }
+  };
+
+  const logoTxt = $('#logoTxt');
+  if (logoTxt) logoTxt.oninput = () => { D.st.logoText = logoTxt.value; updateThemePreview(); };
+
+  const saveThemeBtn = $('#saveThemeBtn');
+  if (saveThemeBtn) saveThemeBtn.onclick = async () => {
+    const themeData = {};
+    ['colorPrimary','colorBg','colorCard'].forEach(k => {
+      const txt = $(`#coltxt_${k}`);
+      if (txt) themeData[k] = txt.value;
+    });
+    const fontSel = $('#fontSel');
+    if (fontSel) themeData.fontFamily = fontSel.value;
+    const heroImgEl = $('#heroImg');
+    if (heroImgEl) themeData.heroImg = heroImgEl.value;
+    const logoEl = $('#logoTxt');
+    if (logoEl) themeData.logoText = logoEl.value;
+    try {
+      await api('a_save', { st: { ...D.st, ...themeData } });
+      D.st = { ...D.st, ...themeData };
+      showMsg('💾 บันทึกธีมแล้ว');
+    } catch (e) { showMsg(e.message, 'err'); }
+  };
+
+  // Settings
+  const saveSettingsBtn = $('#saveSettingsBtn');
+  if (saveSettingsBtn) saveSettingsBtn.onclick = async () => {
+    const fields = ['title','sub','ann','pp','contact'];
+    const data = {};
+    fields.forEach(k => { const el = $(`#st_${k}`); if (el) data[k] = el.value; });
+    try {
+      await api('a_save', { st: { ...D.st, ...data } });
+      D.st = { ...D.st, ...data };
+      showMsg('💾 บันทึกตั้งค่าแล้ว');
+    } catch (e) { showMsg(e.message, 'err'); }
+  };
+}
+
+function updateThemePreview() {
+  const p = $(`#coltxt_colorPrimary`)?.value || '#d8f01c';
+  const bg = $(`#coltxt_colorBg`)?.value || '#050505';
+  const card = $(`#coltxt_colorCard`)?.value || '#0d0d0b';
+  const bar = $('#prevBar');
+  if (bar) { bar.style.background = bg; bar.style.color = p; }
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+(async () => {
+  if (K) { try { await load(); } catch (e) { K = ''; sessionStorage.removeItem('akey'); } }
+  render();
+})();
+</script>
+</body>
+</html>
